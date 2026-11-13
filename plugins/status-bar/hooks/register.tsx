@@ -144,7 +144,7 @@ export const register: Register = on => {
       r?.resetsAt ? `↻${dur(Date.parse(r.resetsAt) - now)}` : ''
 
     return (
-      <Box flexDirection="column" gap={1}>
+      <Box flexDirection="column" gap={e.props.maxRows >= 8 ? 1 : 0}>
         <Box flexDirection="row" justifyContent="space-between">
           <Box flexDirection="row" flexWrap="wrap" gap={1}>
             {project ? <Text bold>{project}</Text> : null}
@@ -172,11 +172,11 @@ export const register: Register = on => {
             />
           ) : null}
           {narrow ? null : (
-            <Box flexDirection="row" gap={1}>
+            <Box flexDirection="row" gap={1} flexShrink={0}>
               <Text dimColor>
                 {shortModel(d.model)}
                 {d.effort ? ` · ${d.effort}` : ''}
-                {hit !== null ? ` · hit ${hit}%` : ' · thinking level and cache hit show after the first prompt'}
+                {hit !== null ? ` · hit ${hit}%` : ' · level & hit: after 1st prompt'}
               </Text>
               {d.lastCacheAt === 0 ? null : cacheLeft > 0 ? (
                 <Text color={cacheLeft < 5 * 60_000 ? 'yellow' : undefined} dimColor={cacheLeft >= 5 * 60_000}>
