@@ -5,6 +5,8 @@ export type Band = {
   prompts: number
   model: string
   effort: string
+  lastCacheAt: number
+  tick: number
   hasHandoff: boolean
 }
 

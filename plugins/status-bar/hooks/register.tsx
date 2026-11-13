@@ -10,16 +10,23 @@ const initial: Band = {
   prompts: 0,
   model: '',
   effort: '',
+  lastCacheAt: 0,
+  tick: 0,
   hasHandoff: false,
 }
 const data = atom({ plugin: 'status-bar', key: 'data' } as const, initial)
 
-const BAR = 10
-
-const bar = (pct: number) => {
-  const n = Math.max(0, Math.min(BAR, Math.round((pct / 100) * BAR)))
-  return { on: '█'.repeat(n), off: '░'.repeat(BAR - n) }
+const bar = (pct: number, width: number) => {
+  const raw = Math.round((pct / 100) * width)
+  const n = Math.max(pct > 0 ? 1 : 0, Math.min(width, raw))
+  return { on: '█'.repeat(n), off: '─'.repeat(width - n) }
 }
+
+// Prompt-cache lifetime after its last use. The API does not report it; 1h is the
+// extended window, set to 5 * 60_000 if your sessions use the 5-minute cache.
+const CACHE_TTL_MS = 60 * 60_000
+
+const tone = (p: number) => (p >= 80 ? 'red' : p >= 60 ? 'yellow' : 'green')
 
 const dur = (ms: number) => {
   const m = Math.max(0, Math.floor(ms / 60000))
@@ -57,6 +64,9 @@ async function refresh($: any) {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await refresh($)
+    $.clock.every(60_000, () => {
+      void update($, data, (d: Band) => ({ ...d, tick: d.tick + 1 }))
+    })
     return next(e)
   })
 
@@ -78,8 +88,11 @@ export const register: Register = on => {
       await refresh($)
       const u = e.usage
       if (u) {
+        const now = await $.clock.now()
         await update($, data, (d: Band) => ({
           ...d,
+          lastCacheAt:
+            u.cache_read_input_tokens + u.cache_creation_input_tokens > 0 ? now : d.lastCacheAt,
           cacheRead: d.cacheRead + u.cache_read_input_tokens,
           cacheInput:
             d.cacheInput +
@@ -105,18 +118,22 @@ export const register: Register = on => {
     const cost = u.cost ? `$${u.cost.usd.toFixed(2)}` : ''
     const pct = u.context.percent ?? 0
     const ctxHigh = pct >= 80
+    const cacheLeft = d.lastCacheAt === 0 ? 0 : CACHE_TTL_MS - (now - d.lastCacheAt)
     const lim = (kind: string) => u.rateLimits.find(r => r.kind === kind)
     const hit = d.cacheInput > 0 ? Math.round((d.cacheRead / d.cacheInput) * 100) : null
 
+    const cols = e.props.bodyColumns
+    const width = cols >= 110 ? 10 : cols >= 80 ? 6 : cols >= 50 ? 4 : 0
+
     const meter = (label: string, p: number, color: string, tail: string) => {
-      const b = bar(p)
+      const b = bar(p, width)
       return (
         <Text>
-          <Text dimColor>{label} </Text>
-          <Text color={color}>{b.on}</Text>
-          <Text dimColor>{b.off}</Text>
+          <Text dimColor>{label}  </Text>
+          {width > 0 ? <Text color={color}>{b.on}</Text> : null}
+          {width > 0 ? <Text dimColor>{b.off}</Text> : null}
           <Text bold color={color === 'red' ? 'red' : undefined}> {Math.round(p)}%</Text>
-          <Text dimColor> {tail}</Text>
+          {tail ? <Text dimColor>  {tail}</Text> : null}
         </Text>
       )
     }
@@ -127,7 +144,7 @@ export const register: Register = on => {
       r?.resetsAt ? `↻${dur(Date.parse(r.resetsAt) - now)}` : ''
 
     return (
-      <Box flexDirection="column">
+      <Box flexDirection="column" gap={1}>
         <Box flexDirection="row" justifyContent="space-between">
           <Box flexDirection="row" flexWrap="wrap" gap={1}>
             {project ? <Text bold>{project}</Text> : null}
@@ -136,26 +153,6 @@ export const register: Register = on => {
               · {dur(now - u.startedAt)} · {d.prompts} prompts{cost ? ` · ${cost}` : ''}
             </Text>
           </Box>
-          {narrow ? null : (
-            <Box flexDirection="row" gap={1}>
-              <Text dimColor>
-                {shortModel(d.model)}
-                {d.effort ? ` · ${d.effort}` : ''}
-                {hit !== null ? ` · hit ${hit}%` : ''}
-              </Text>
-              {hit === null ? null : (
-                <Text color={hit >= 50 ? 'green' : 'yellow'}>
-                  {'▰'.repeat(Math.max(1, Math.round(hit / 25)))}
-                </Text>
-              )}
-            </Box>
-          )}
-        </Box>
-        <Box flexDirection="row" flexWrap="wrap" gap={2}>
-          {meter('ctx', pct, ctxHigh ? 'red' : 'blue', `${k(u.context.tokens ?? 0)}/${k(u.context.window)}`)}
-          {ctxHigh ? <Text color="red">⚠ limit</Text> : null}
-          {five ? meter('5h', five.percentUsed, 'blue', reset(five)) : null}
-          {week ? meter('week', week.percentUsed, 'blue', reset(week)) : null}
           {pct >= 50 ? (
             <Button
               key="handoff"
@@ -174,6 +171,38 @@ export const register: Register = on => {
               }}
             />
           ) : null}
+          {narrow ? null : (
+            <Box flexDirection="row" gap={1}>
+              <Text dimColor>
+                {shortModel(d.model)}
+                {d.effort ? ` · ${d.effort}` : ''}
+                {hit !== null ? ` · hit ${hit}%` : ' · thinking level and cache hit show after the first prompt'}
+              </Text>
+              {d.lastCacheAt === 0 ? null : cacheLeft > 0 ? (
+                <Text color={cacheLeft < 5 * 60_000 ? 'yellow' : undefined} dimColor={cacheLeft >= 5 * 60_000}>
+                  ⏱ {cacheLeft < 60_000 ? '<1m' : dur(cacheLeft)}
+                </Text>
+              ) : (
+                <Text color="yellow">⏱ cold</Text>
+              )}
+              {hit === null ? null : (
+                <Text color={hit >= 50 ? 'green' : 'yellow'}>
+                  {'▰'.repeat(Math.max(1, Math.round(hit / 25)))}
+                </Text>
+              )}
+            </Box>
+          )}
+        </Box>
+        <Box flexDirection={narrow ? 'column' : 'row'}>
+          <Box width={narrow ? '100%' : '34%'} justifyContent="flex-start">
+            {meter('ctx', pct, tone(pct), `${k(u.context.tokens ?? 0)}/${k(u.context.window)}${ctxHigh ? ' ⚠' : ''}`)}
+          </Box>
+          <Box width={narrow ? '100%' : '33%'} justifyContent={narrow ? 'flex-start' : 'center'}>
+            {five ? meter('5h', five.percentUsed, tone(five.percentUsed), reset(five)) : null}
+          </Box>
+          <Box width={narrow ? '100%' : '33%'} justifyContent={narrow ? 'flex-start' : 'flex-end'}>
+            {week ? meter('week', week.percentUsed, tone(week.percentUsed), reset(week)) : null}
+          </Box>
         </Box>
       </Box>
     )
