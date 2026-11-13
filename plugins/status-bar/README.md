@@ -10,18 +10,65 @@ At 50% context a **Handoff [H]** button appears. It runs the [handoff skill](htt
 
 The band collapses its right-hand group on narrow terminals.
 
+## Requirements
+
+- A Claude Code version that supports mods (plugins with a `hooks` module). Check with `claude --version` and update if the install below reports an unknown hook or module.
+- `git` on your PATH. Claude Code uses it to fetch the marketplace, and the band uses it to show your branch.
+- The rate-limit bars appear only on a Claude subscription.
+
 ## Install
 
-The repository is `claude-status-bar`; the plugin in it is named `status-bar`.
+This repository is a plugin marketplace named `claude-status-bar`. The plugin in it is named `status-bar`.
+
+### Option 1: one line inside Claude Code
 
 ```
 /plugin install status-bar --marketplace andrzej-zernaczuk/claude-status-bar
 ```
 
+### Option 2: from the terminal
+
+Add the marketplace once, then install the plugin for your user, so it loads in every project:
+
+```bash
+claude plugin marketplace add andrzej-zernaczuk/claude-status-bar
+```
+```bash
+claude plugin install status-bar@claude-status-bar --scope user
+```
+
+Use `--scope project` instead to install it for the current project only.
+
+### Try it without installing
+
+Clone the repository and point Claude Code at the plugin folder:
+
+```bash
+git clone https://github.com/andrzej-zernaczuk/claude-status-bar.git
+```
+```bash
+claude --plugin-dir ./claude-status-bar/plugins/status-bar
+```
+
+After installing, start a new Claude Code session. The band appears above the prompt.
+
+## Update and remove
+
+```bash
+claude plugin marketplace update claude-status-bar
+```
+```bash
+claude plugin uninstall status-bar@claude-status-bar
+```
+
+## Handoff button
+
+The button appears once context usage reaches 50%. To have the skill ready beforehand, install it from [mattpocock/skills](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff) into `~/.claude/skills/handoff`. Otherwise press the button and approve the install when Claude asks.
+
 ## Notes
 
 - Cache hit rate is `cache_read / (input + cache_read + cache_creation)` over the main-thread turns since the mod loaded.
 - Cost is the session ledger's API-equivalent figure, not what your subscription bills.
-- Rate-limit bars appear only on a subscription.
+- The thinking level shows once the first request of a session has gone out, and only for models that take an effort setting.
 
 MIT licensed.
