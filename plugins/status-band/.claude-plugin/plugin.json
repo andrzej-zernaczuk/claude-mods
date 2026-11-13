@@ -1,0 +1,12 @@
+{
+  "name": "status-band",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Two-row status band above the prompt: project, branch, cost, context, limits, model, cache, handoff.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Andrzej Żernaczuk",
+    "url": "https://github.com/andrzej-zernaczuk"
+  },
+  "repository": "https://github.com/andrzej-zernaczuk/claude-status-bar"
+}
