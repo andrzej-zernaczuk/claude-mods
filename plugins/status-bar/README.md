@@ -1,4 +1,4 @@
-# claude-status-bar
+# status-bar
 
 A compact two-row status band above the Claude Code prompt.
 
@@ -18,12 +18,12 @@ The band collapses its right-hand group on narrow terminals.
 
 ## Install
 
-This repository is a plugin marketplace named `claude-status-bar`. The plugin in it is named `status-bar`.
+This plugin lives in the `claude-mods` marketplace.
 
 ### Option 1: one line inside Claude Code
 
 ```
-/plugin install status-bar --marketplace andrzej-zernaczuk/claude-status-bar
+/plugin install status-bar --marketplace andrzej-zernaczuk/claude-mods
 ```
 
 ### Option 2: from the terminal
@@ -31,10 +31,10 @@ This repository is a plugin marketplace named `claude-status-bar`. The plugin in
 Add the marketplace once, then install the plugin for your user, so it loads in every project:
 
 ```bash
-claude plugin marketplace add andrzej-zernaczuk/claude-status-bar
+claude plugin marketplace add andrzej-zernaczuk/claude-mods
 ```
 ```bash
-claude plugin install status-bar@claude-status-bar --scope user
+claude plugin install status-bar@claude-mods --scope user
 ```
 
 Use `--scope project` instead to install it for the current project only.
@@ -44,10 +44,10 @@ Use `--scope project` instead to install it for the current project only.
 Clone the repository and point Claude Code at the plugin folder:
 
 ```bash
-git clone https://github.com/andrzej-zernaczuk/claude-status-bar.git
+git clone https://github.com/andrzej-zernaczuk/claude-mods.git
 ```
 ```bash
-claude --plugin-dir ./claude-status-bar/plugins/status-bar
+claude --plugin-dir ./claude-mods/plugins/status-bar
 ```
 
 After installing, start a new Claude Code session. The band appears above the prompt.
@@ -55,10 +55,10 @@ After installing, start a new Claude Code session. The band appears above the pr
 ## Update and remove
 
 ```bash
-claude plugin marketplace update claude-status-bar
+claude plugin marketplace update claude-mods
 ```
 ```bash
-claude plugin uninstall status-bar@claude-status-bar
+claude plugin uninstall status-bar@claude-mods
 ```
 
 ## Handoff button
