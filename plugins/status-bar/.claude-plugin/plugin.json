@@ -1,6 +1,6 @@
 {
   "name": "status-bar",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "description": "Two-row status band above the prompt: project, branch, cost, context, limits, model, cache, handoff.",
   "types": "./types/index.d.ts",

@@ -125,14 +125,15 @@ export const register: Register = on => {
     const cols = e.props.bodyColumns
     const width = cols >= 110 ? 10 : cols >= 80 ? 6 : cols >= 50 ? 4 : 0
 
-    const meter = (label: string, p: number, color: string, tail: string) => {
+    const meter = (label: string, value: number | null, color: string, tail: string) => {
+      const p = value ?? 0
       const b = bar(p, width)
       return (
         <Text>
           <Text dimColor>{label}  </Text>
           {width > 0 ? <Text color={color}>{b.on}</Text> : null}
           {width > 0 ? <Text dimColor>{b.off}</Text> : null}
-          <Text bold color={color === 'red' ? 'red' : undefined}> {Math.round(p)}%</Text>
+          <Text bold color={color === 'red' ? 'red' : undefined}> {value === null ? '–' : `${Math.round(p)}%`}</Text>
           {tail ? <Text dimColor>  {tail}</Text> : null}
         </Text>
       )
@@ -176,7 +177,7 @@ export const register: Register = on => {
               <Text dimColor>
                 {shortModel(d.model)}
                 {d.effort ? ` · ${d.effort}` : ''}
-                {hit !== null ? ` · hit ${hit}%` : ' · level & hit: after 1st prompt'}
+                {hit !== null ? ` · hit ${hit}%` : ' · hit: after 1st prompt'}
               </Text>
               {d.lastCacheAt === 0 ? null : cacheLeft > 0 ? (
                 <Text color={cacheLeft < 5 * 60_000 ? 'yellow' : undefined} dimColor={cacheLeft >= 5 * 60_000}>
@@ -198,10 +199,10 @@ export const register: Register = on => {
             {meter('ctx', pct, tone(pct), `${k(u.context.tokens ?? 0)}/${k(u.context.window)}${ctxHigh ? ' ⚠' : ''}`)}
           </Box>
           <Box width={narrow ? '100%' : '33%'} justifyContent={narrow ? 'flex-start' : 'center'}>
-            {five ? meter('5h', five.percentUsed, tone(five.percentUsed), reset(five)) : null}
+            {meter('5h', five ? five.percentUsed : null, five ? tone(five.percentUsed) : 'green', reset(five))}
           </Box>
           <Box width={narrow ? '100%' : '33%'} justifyContent={narrow ? 'flex-start' : 'flex-end'}>
-            {week ? meter('week', week.percentUsed, tone(week.percentUsed), reset(week)) : null}
+            {meter('week', week ? week.percentUsed : null, week ? tone(week.percentUsed) : 'green', reset(week))}
           </Box>
         </Box>
       </Box>
