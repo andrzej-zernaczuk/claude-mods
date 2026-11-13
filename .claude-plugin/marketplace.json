@@ -6,8 +6,8 @@
   },
   "plugins": [
     {
-      "name": "status-band",
-      "source": "./plugins/status-band",
+      "name": "status-bar",
+      "source": "./plugins/status-bar",
       "description": "Two-row status band above the prompt",
       "author": {
         "name": "Andrzej Żernaczuk",

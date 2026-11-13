@@ -12,7 +12,7 @@ const initial: Band = {
   effort: '',
   hasHandoff: false,
 }
-const data = atom({ plugin: 'status-band', key: 'data' } as const, initial)
+const data = atom({ plugin: 'status-bar', key: 'data' } as const, initial)
 
 const BAR = 10
 

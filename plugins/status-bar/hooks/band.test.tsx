@@ -1,7 +1,7 @@
 import { expect, test } from 'claude-code/testing'
 
 const BAND = {
-  plugin: 'status-band',
+  plugin: 'status-bar',
   component: 'AbovePrompt',
   surface: 'terminal',
   props: { hasSurvey: false, isCollapsed: false, isWorking: false, bodyColumns: 120, maxRows: 10, scroll: { offset: 0, bodyRows: 10 } },

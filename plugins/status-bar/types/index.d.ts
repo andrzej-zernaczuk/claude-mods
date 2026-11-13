@@ -10,6 +10,6 @@ export type Band = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'status-band': { data: Band }
+    'status-bar': { data: Band }
   }
 }

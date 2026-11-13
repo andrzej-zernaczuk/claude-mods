@@ -6,16 +6,16 @@ A compact two-row status band above the Claude Code prompt.
 
 **Row 2:** context usage, 5-hour limit and weekly limit, each with a progress bar, a percentage and a reset countdown. The context bar turns red with a warning at high usage.
 
-At 50% context a **Handoff [H]** button appears. It runs the [handoff skill](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff) from [mattpocock/skills](https://github.com/mattpocock/skills). If the skill is not installed, pressing the button asks Claude to install it.
+At 50% context a **Handoff [H]** button appears. It runs the [handoff skill](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff) from [mattpocock](https://github.com/mattpocock). If the skill is not installed, pressing the button asks Claude to install it.
 
 The band collapses its right-hand group on narrow terminals.
 
 ## Install
 
-The plugin is named `status-band`:
+The repository is `claude-status-bar`; the plugin in it is named `status-bar`.
 
 ```
-/plugin install status-band --marketplace andrzej-zernaczuk/claude-status-bar
+/plugin install status-bar --marketplace andrzej-zernaczuk/claude-status-bar
 ```
 
 ## Notes
